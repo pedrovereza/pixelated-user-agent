@@ -12,9 +12,12 @@ def fill_by_xpath(context, xpath, text):
     field = context.browser.find_element_by_xpath(xpath)
     field.send_keys(text)
 
+def take_screenshot(context):
+    context.browser.save_screenshot('/tmp/screenshot.jpeg')
 
 @given('I compose a message with')
 def impl(context):
+    take_screenshot(context)
     toggle = context.browser.find_element_by_id('compose-mails-trigger')
     toggle.click()
 
@@ -45,5 +48,11 @@ def save_impl(context):
 
 @when('I open the saved draft and send it')
 def send_impl(context):
-    context.execute_steps('I select the tag \'drafts\'')
-    context.execute_steps('I open the first mail in the mail list')
+    context.execute_steps(u"when I select the tag 'drafts'")
+    context.execute_steps(u"when I open the first mail in the mail list")
+
+    #TODO: Convert me to python
+    #page.should_not have_css("#send-button[disabled]")
+    #click_button('Send')
+    #find('#user-alerts').should have_content("Your message was sent!")
+
