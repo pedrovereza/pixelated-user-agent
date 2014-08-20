@@ -3,21 +3,13 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
-def wait_until_element_is_visible_by_locator(context, locator_tuple):
-    wait = WebDriverWait(context.browser, 10)
-    wait.until(EC.visibility_of_element_located(locator_tuple))
+from common import *
+from hamcrest import *
 
-
-def fill_by_xpath(context, xpath, text):
-    field = context.browser.find_element_by_xpath(xpath)
-    field.send_keys(text)
-
-def take_screenshot(context):
-    context.browser.save_screenshot('/tmp/screenshot.jpeg')
 
 @given('I compose a message with')
 def impl(context):
-    take_screenshot(context)
+    take_screenshot(context, '/tmp/screenshot.jpeg')
     toggle = context.browser.find_element_by_id('compose-mails-trigger')
     toggle.click()
 
@@ -50,9 +42,7 @@ def save_impl(context):
 def send_impl(context):
     context.execute_steps(u"when I select the tag 'drafts'")
     context.execute_steps(u"when I open the first mail in the mail list")
-
-    #TODO: Convert me to python
-    #page.should_not have_css("#send-button[disabled]")
-    #click_button('Send')
-    #find('#user-alerts').should have_content("Your message was sent!")
+    assert_that(is_not(page_has_css(context, '#send-button[disabled]')))
+    click_button(context, 'Send')
+    element_should_have_content(context, '#user-alerts', 'Your message was sent!')
 
