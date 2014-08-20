@@ -1,7 +1,9 @@
+import re
 from selenium.webdriver.common.keys import Keys
 from behave import *
 from common import *
 from hamcrest import *
+from time import sleep
 
 @then('I see that the subject reads \'{subject}\'')
 def impl(context, subject):
@@ -34,9 +36,6 @@ def impl(context):
 
 @then('I see if the mail has html content')
 def impl(context):
-    #find('#mail-view .bodyArea').should have_css('h2[style*=\'color: #3f4944\']', :text => "cborim")
-
-    dump_source_to(context, '/tmp/see_html.html')
     e = find_element_by_css_selector(context, '#mail-view .bodyArea')
     h2 = e.find_element_by_css_selector("h2[style*='color: #3f4944']")
     assert_that(h2.text, contains_string('cborim'))
@@ -49,4 +48,34 @@ def impl(context):
 
     e = find_element_by_css_selector(context, '#user-alerts')
     assert_that(e.text, equal_to('Your message was moved to trash!'))
+
+@then('I choose to forward this mail')
+def impl(context):
+    wait_until_button_is_visible(context, 'Forward')
+    click_button(context, 'Forward')
+
+@then('I forward this mail')
+def impl(context):
+    wait_until_button_is_visible(context, 'Send')
+    click_button(context, 'Send')
+
+@then('I remove all tags')
+def impl(context):
+    e = find_element_by_css_selector(context, '.tagsArea')
+    tags = e.find_elements_by_css_selector('.tag')
+    assert_that(len(tags), greater_than(0))
+    for tag in tags:
+        tag.click()
+
+@then('I choose to trash')
+def impl(context):
+    wait_until_button_is_visible(context, 'Trash message')
+    click_button(context, 'Trash message')
+
+@then('I see the mail has a cc and a bcc recipient')
+def impl(context):
+    cc = find_element_by_css_selector(context, '.msg-header .cc')
+    bcc = find_element_by_css_selector(context, '.msg-header .bcc')
+
+    assert_that(cc.text, matches_regexp('[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+'))
 

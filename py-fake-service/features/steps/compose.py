@@ -2,7 +2,7 @@ from behave import given, when
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
-
+from time import sleep
 from common import *
 from hamcrest import *
 
@@ -32,6 +32,16 @@ def choose_impl(context, recipients_field, to_type):
     wait_until_element_is_visible_by_locator(context, (By.CLASS_NAME, 'tt-dropdown-menu'))
     browser.find_element_by_css_selector('.tt-dropdown-menu div div').click()
 
+@then("for the '{recipients_field}' field I type '{to_type}' and chose the first contact that shows")
+def choose_impl(context, recipients_field, to_type):
+    recipients_field = recipients_field.lower()
+    browser = context.browser
+    field = browser.find_element_by_css_selector(
+        '#recipients-%s-area .tt-input' % recipients_field
+        )
+    field.send_keys(to_type)
+    sleep(1)
+    find_element_by_css_selector(context, '.tt-dropdown-menu div div').click()
 
 @given('I save the draft')
 def save_impl(context):

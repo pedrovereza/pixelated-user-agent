@@ -4,6 +4,13 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
 from hamcrest import *
 
+def wait_until_element_is_invisible_by_locator(context, locator_tuple):
+    wait = WebDriverWait(context.browser, 10)
+    wait.until(EC.invisibility_of_element_located(locator_tuple))
+
+def wait_for_user_alert_to_disapear(context):
+    wait_until_element_is_invisible_by_locator(context, (By.ID, 'user-alerts'))
+
 def wait_until_element_is_visible_by_locator(context, locator_tuple):
     wait = WebDriverWait(context.browser, 10)
     wait.until(EC.visibility_of_element_located(locator_tuple))
@@ -42,6 +49,11 @@ def find_element_containing_text(context, text, element_type='*'):
 def element_should_have_content(context, css_selector, content):
     e = find_element_by_css_selector(context, css_selector)
     assert_that(e.text, equal_to(content))
+
+def wait_until_button_is_visible(context, title):
+    wait = WebDriverWait(context.browser, 10)
+    locator_tuple = (By.XPATH, ("//%s[contains(.,'%s')]" % ('button', title)))
+    wait.until(EC.visibility_of_element_located(locator_tuple))
 
 def click_button(context,  title):
     button = find_element_containing_text(context, title, element_type='button')
