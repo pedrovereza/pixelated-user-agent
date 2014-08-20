@@ -32,3 +32,21 @@ def impl(context):
     click_button(context, 'Send')
     context.reply_subject = reply_subject(context)
 
+@then('I see if the mail has html content')
+def impl(context):
+    #find('#mail-view .bodyArea').should have_css('h2[style*=\'color: #3f4944\']', :text => "cborim")
+
+    dump_source_to(context, '/tmp/see_html.html')
+    e = find_element_by_css_selector(context, '#mail-view .bodyArea')
+    h2 = e.find_element_by_css_selector("h2[style*='color: #3f4944']")
+    assert_that(h2.text, contains_string('cborim'))
+
+@when('I try to delete the first mail')
+def impl(context):
+    context.execute_steps(u"When I open the first mail in the mail list")
+    find_element_by_css_selector(context, '#mail-view #view-more-actions').click()
+    context.browser.execute_script("$('#delete-button-top').click();")
+
+    e = find_element_by_css_selector(context, '#user-alerts')
+    assert_that(e.text, equal_to('Your message was moved to trash!'))
+

@@ -24,6 +24,7 @@ def impl(context):
 
 @when('I open the first mail in the mail list')
 def impl(context):
+    dump_source_to(context, '/tmp/first-mail.html')
     elements = context.browser.find_elements_by_xpath('//*[@id="mail-list"]//a')
     context.current_mail_id = elements[0].get_attribute('href').split('/')[-1]
     elements[0].click()
@@ -42,4 +43,8 @@ def impl(context):
 def impl(context):
     src = context.browser.page_source
     assert_that(src, contains_string(context.reply_subject))
+
+@then('the deleted mail is there')
+def impl(context):
+    check_current_mail_is_visible(context)
 
