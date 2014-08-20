@@ -26,9 +26,7 @@ def dump_source_to(context, filename):
 @when('I select the tag \'{tag}\'')
 def impl(context, tag):
     wait_for_user_alert_to_disapear(context)
-    #context.browser.save_screenshot('/tmp/screenshot-tag.jpeg')
     click_first_element_with_class(context, 'left-off-canvas-toggle')
     context.browser.execute_script("window.scrollBy(0, -200)")
-    dump_source_to(context, '/tmp/foobar.html')
     e = context.browser.find_element_by_xpath('//*[@id="tag-list"]/ul/li[contains(translate(., "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "%s")]' % tag)
     e.click()

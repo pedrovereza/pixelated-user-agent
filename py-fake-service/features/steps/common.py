@@ -33,6 +33,9 @@ def find_element_by_xpath(context, xpath):
 def find_element_by_css_selector(context, css_selector):
     return context.browser.find_element_by_css_selector(css_selector)
 
+def find_elements_by_css_selector(context, css_selector):
+    return context.browser.find_elements_by_css_selector(css_selector)
+
 def find_element_containing_text(context, text, element_type='*'):
     return context.browser.find_element_by_xpath("//%s[contains(.,'%s')]" % (element_type, text))
 
@@ -44,3 +47,10 @@ def click_button(context,  title):
     button = find_element_containing_text(context, title, element_type='button')
     button.click()
 
+def mail_subject(context):
+    e = find_element_by_css_selector(context, '#mail-view .subject')
+    return e.text
+
+def reply_subject(context):
+    e = find_element_by_css_selector(context, '#reply-subject')
+    return e.text
