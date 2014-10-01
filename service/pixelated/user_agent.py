@@ -20,6 +20,7 @@ import getpass
 import os
 import os.path
 import crochet
+import xapian
 from flask import Flask
 from flask import request
 from flask import Response
@@ -78,13 +79,18 @@ def update_draft():
 
 @app.route('/mails')
 def mails():
-    query = search_query.compile(request.args.get("q")) if request.args.get("q") else {'tags': {}}
+    if(':' in request.args.get("q")):
+        query = search_query.compile(request.args.get("q")) if request.args.get("q") else {'tags': {}}
+        mails = mail_service.mails(query)
+    else:
+        querystring = request.args.get("q")
+        session = xapian.Enquire(index_db)
+        query = xapian.Query(xapian.Query.OP_OR, querystring.split(' '))
+        session.set_query(query)
+        results = session.get_mset(0,9999)
+        mails = [querier.mail(result.document.get_data()) for result in results]
 
-    mails = mail_service.mails(query)
-
-    if "inbox" in query['tags']:
-        mails = [mail for mail in mails if not mail.has_tag('trash')]
-
+    
     response = {
         "stats": {
             "total": len(mails),
@@ -166,13 +172,25 @@ def register_new_user(username):
 def start_user_agent(debug_enabled):
     leap_session = LeapSession.open(app.config['LEAP_USERNAME'], app.config['LEAP_PASSWORD'],
                                     app.config['LEAP_SERVER_NAME'])
-    SoledadQuerier.get_instance(soledad=leap_session.account._soledad)
+    global querier
+    querier = SoledadQuerier.get_instance(soledad=leap_session.account._soledad)
     PixelatedMail.from_email_address = leap_session.account_email()
     pixelated_mailboxes = PixelatedMailBoxes(leap_session.account)
     pixelated_mail_sender = PixelatedMailSender(leap_session.account_email())
 
     global mail_service
     mail_service = MailService(pixelated_mailboxes, pixelated_mail_sender)
+
+    all_mails = querier.all_mails()
+    
+    global index_db
+    index_db = xapian.inmemory_open()
+    for mail in all_mails:
+        doc = xapian.Document()
+        doc.set_data(mail.ident)
+        map(doc.add_term, filter(None, mail.body.split(' ')))
+        map(doc.add_term, filter(None, mail.tags))
+        index_db.add_document(doc)
 
     app.run(host=app.config['HOST'], debug=debug_enabled,
             port=app.config['PORT'], use_reloader=False)
