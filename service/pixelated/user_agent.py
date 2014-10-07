@@ -79,18 +79,18 @@ def update_draft():
 
 @app.route('/mails')
 def mails():
-    if(':' in request.args.get("q")):
-        query = search_query.compile(request.args.get("q")) if request.args.get("q") else {'tags': {}}
-        mails = mail_service.mails(query)
-    else:
-        querystring = request.args.get("q")
-        session = xapian.Enquire(index_db)
-        query = xapian.Query(xapian.Query.OP_OR, querystring.split(' '))
-        session.set_query(query)
-        results = session.get_mset(0,9999)
-        mails = [querier.mail(result.document.get_data()) for result in results]
+    #if(':' in request.args.get("q")):
+    #    query = search_query.compile(request.args.get("q")) if request.args.get("q") else {'tags': {}}
+    #    mails = mail_service.mails(query)
+    #else:
+    querystring = request.args.get("q")
+    query_parser = xapian.QueryParser()
+    session = xapian.Enquire(index_db)
+    query = xapian.Query(query_parser.parse_query(querystring))
+    session.set_query(query)
+    results = session.get_mset(0,9999)
+    mails = [querier.mail(result.document.get_data()) for result in results]
 
-    
     response = {
         "stats": {
             "total": len(mails),
@@ -182,14 +182,26 @@ def start_user_agent(debug_enabled):
     mail_service = MailService(pixelated_mailboxes, pixelated_mail_sender)
 
     all_mails = querier.all_mails()
-    
+
+    def create_mail_indexing_document(mail):
+        doc = xapian.Document()
+        doc.set_data(mail.ident)
+        term_generator = xapian.TermGenerator()
+        term_generator.set_document(doc)
+        term_generator.index_text(mail.body)
+        map(doc.add_term, map(lambda tag: "XTAG%s" %tag.lower(), filter(None, mail.tags)))
+        if mail.headers['From']: doc.add_term("XFROM%s" %mail.headers['From'].lower())
+        if mail.headers['Cc']: map(lambda recp: doc.add_term("XCC%s" %recp.lower()), mail.headers['Cc'])
+        if mail.headers['Bcc']: map(lambda recp: doc.add_term("XBCC%s" %recp.lower()), mail.headers['Bcc'])
+        if mail.headers['To']: map(lambda recp: doc.add_term("XTo%s" %recp.lower()), mail.headers['To'])
+        if mail.headers['Date']: doc.add_term("XDATE%s" %mail.headers['Date'].lower())
+        if mail.headers['Subject']: doc.add_term("XSUBJECT%s" %mail.headers['Subject'].lower())
+        return doc
+
     global index_db
     index_db = xapian.inmemory_open()
     for mail in all_mails:
-        doc = xapian.Document()
-        doc.set_data(mail.ident)
-        map(doc.add_term, filter(None, mail.body.split(' ')))
-        map(doc.add_term, filter(None, mail.tags))
+        doc = create_mail_indexing_document(mail)
         index_db.add_document(doc)
 
     app.run(host=app.config['HOST'], debug=debug_enabled,

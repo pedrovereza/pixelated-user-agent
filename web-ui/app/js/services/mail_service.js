@@ -134,7 +134,7 @@ define(
       };
 
       function compileQuery(data) {
-        var query = 'tag:"' + that.attr.currentTag + '"';
+        var query = 'tag:' + that.attr.currentTag;
 
         if (data.tag === 'all') {
           query = 'in:all';
@@ -146,6 +146,7 @@ define(
         this.attr.currentTag = data.tag;
         this.updateCurrentPageNumber(0);
 
+        debugger;
         this.fetchMail(compileQuery(data), this.attr.currentTag, false, data);
       };
 
