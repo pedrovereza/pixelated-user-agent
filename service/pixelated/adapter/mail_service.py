@@ -27,11 +27,15 @@ class MailService:
         self.mailboxes = mailboxes
         self.querier = SoledadQuerier.get_instance()
         self.mail_sender = mail_sender
-        self.tag_service.load_index(self.mails(MailService.ALL_MAILS_QUERY))
+        self.tag_service.load_index(self.all_mails())
 
-    def mails(self, query):
-        _mails = self.mailboxes.mails_by_tag(query['tags']) if query['tags'] else self.querier.all_mails()
-        return sorted(_mails or [], key=lambda mail: mail.headers['Date'], reverse=True)
+    def all_mails(self):
+        return self.querier.all_mails()
+
+    def mails(self, ids):
+        #_mails = self.mailboxes.mails_by_tag(query['tags']) if query['tags'] else self.querier.all_mails()
+        #return sorted(_mails or [], key=lambda mail: mail.headers['Date'], reverse=True)
+        return self.querier.mails(ids)
 
     def update_tags(self, mail_id, new_tags):
         reserved_words = self.tag_service.extract_reserved(new_tags)

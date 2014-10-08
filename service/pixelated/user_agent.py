@@ -35,7 +35,7 @@ from pixelated.bitmask_libraries.auth import LeapAuthenticator, LeapCredentials
 from pixelated.adapter.mail_service import MailService
 from pixelated.adapter.pixelated_mail import PixelatedMail, InputMail
 from pixelated.adapter.soledad_querier import SoledadQuerier
-
+from pixelated.adapter.search import SearchEngine
 
 static_folder = os.path.abspath(os.path.join(os.path.abspath(__file__), "..", "..", "web-ui", "app"))
 
@@ -85,12 +85,11 @@ def update_draft():
 
 @app.route('/mails')
 def mails():
-    query = search_query.compile(request.args.get("q")) if request.args.get("q") else {'tags': {}}
+    #query = search_query.compile(request.args.get("q")) if request.args.get("q") else {'tags': {}}
 
-    mails = mail_service.mails(query)
-
-    if "inbox" in query['tags']:
-        mails = [mail for mail in mails if not mail.has_tag('trash')]
+    mail_ids = search_engine.search(request.args.get('q'))
+    mails = mail_service.mails(mail_ids)
+    #mails = mail_service.mails(query)
 
     response = {
         "stats": {
@@ -189,6 +188,9 @@ def start_user_agent(debug_enabled):
 
     global mail_service
     mail_service = MailService(pixelated_mailboxes, pixelated_mail_sender)
+    global search_engine
+    search_engine = SearchEngine()
+    search_engine.index_mails(mail_service.all_mails())
 
     app.run(host=app.config['HOST'], debug=debug_enabled,
             port=app.config['PORT'], use_reloader=False)
