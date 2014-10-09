@@ -4,6 +4,7 @@ from pixelated.adapter.draft_service import DraftService
 import test_helper
 from mockito import *
 
+
 class DraftServiceTest(unittest.TestCase):
 
     def setUp(self):

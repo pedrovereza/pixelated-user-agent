@@ -49,6 +49,7 @@ if not os.path.exists(static_folder):
 app = Flask(__name__, static_url_path='', static_folder=static_folder)
 DISABLED_FEATURES = ['draftReply', 'signatureStatus', 'encryptionStatus', 'contacts']
 
+
 def respond_json(entity, status_code=200):
     json_response = json.dumps(entity)
     response = Response(response=json_response, mimetype="application/json")
@@ -86,11 +87,8 @@ def update_draft():
 
 @app.route('/mails')
 def mails():
-    #query = search_query.compile(request.args.get("q")) if request.args.get("q") else {'tags': {}}
-
     mail_ids = search_engine.search(request.args.get('q'))
     mails = mail_service.mails(mail_ids)
-    #mails = mail_service.mails(query)
 
     response = {
         "stats": {

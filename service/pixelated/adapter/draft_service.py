@@ -17,5 +17,3 @@ class DraftService(object):
 
     def _drafts(self):
         return self._mailboxes.drafts()
-
-

@@ -2,6 +2,7 @@ from whoosh.fields import *
 from whoosh.filedb.filestore import RamStorage
 from whoosh.qparser import QueryParser
 
+
 class SearchEngine(object):
     __slots__ = '_index'
 
@@ -10,14 +11,14 @@ class SearchEngine(object):
 
     def _mail_schema(self):
         return Schema(
-                ident=ID(stored=True),
-                sender=ID(stored=False),
-                to=ID(stored=False),
-                cc=ID(stored=False),
-                bcc=ID(stored=False),
-                subject=TEXT(stored=False),
-                body=TEXT(stored=False),
-                tag=KEYWORD(stored=False, commas=True))
+            ident=ID(stored=True),
+            sender=ID(stored=False),
+            to=ID(stored=False),
+            cc=ID(stored=False),
+            bcc=ID(stored=False),
+            subject=TEXT(stored=False),
+            body=TEXT(stored=False),
+            tag=KEYWORD(stored=False, commas=True))
 
     def _create_index(self):
         return RamStorage().create_index(self._mail_schema(), indexname='mails')
@@ -33,14 +34,14 @@ class SearchEngine(object):
         tags = mdict.get('tags', [])
         tags.append(mail.mailbox_name.lower())
         index_data = {
-                'sender': unicode(header.get('from', '')),
-                'subject': unicode(header.get('subject', '')),
-                'to': unicode(header.get('to', '')),
-                'cc': unicode(header.get('cc', '')),
-                'bcc': unicode(header.get('bcc', '')),
-                'tag': u','.join(tags),
-                'body': unicode(mdict['body']),
-                'ident': unicode(mdict['ident'])
+            'sender': unicode(header.get('from', '')),
+            'subject': unicode(header.get('subject', '')),
+            'to': unicode(header.get('to', '')),
+            'cc': unicode(header.get('cc', '')),
+            'bcc': unicode(header.get('bcc', '')),
+            'tag': u','.join(tags),
+            'body': unicode(mdict['body']),
+            'ident': unicode(mdict['ident'])
         }
 
         writer.add_document(**index_data)
@@ -52,7 +53,6 @@ class SearchEngine(object):
                 self._index_mail(writer, mail)
         finally:
             writer.commit()
-
 
     def search(self, query):
         query = query.replace('\"', '')
