@@ -46,7 +46,7 @@ class MailService:
     def send(self, last_draft_ident, mail):
         self.mail_sender.sendmail(mail)
         self.mailboxes.drafts().remove(last_draft_ident)
-        self.mailboxes.sent().add(mail)
+        return self.mailboxes.sent().add(mail)
 
     def thread(self, thread_id):
         raise NotImplementedError()

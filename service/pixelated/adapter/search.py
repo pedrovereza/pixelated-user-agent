@@ -11,7 +11,7 @@ class SearchEngine(object):
 
     def _mail_schema(self):
         return Schema(
-            ident=ID(stored=True),
+            ident=ID(stored=True, unique=True),
             sender=ID(stored=False),
             to=ID(stored=False),
             cc=ID(stored=False),
@@ -44,7 +44,7 @@ class SearchEngine(object):
             'ident': unicode(mdict['ident'])
         }
 
-        writer.add_document(**index_data)
+        writer.update_document(**index_data)
 
     def index_mails(self, mails):
         writer = self._index.writer()
@@ -62,3 +62,10 @@ class SearchEngine(object):
             query = QueryParser('body', self._index.schema).parse(query)
             results = searcher.search(query)
             return [mail['ident'] for mail in results]
+
+    def remove_from_index(self, mail_id):
+        writer = self._index.writer()
+        try:
+            writer.delete_by_term('ident', mail_id)
+        finally:
+            writer.commit()

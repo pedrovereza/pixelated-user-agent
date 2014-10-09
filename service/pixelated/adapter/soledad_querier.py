@@ -64,6 +64,7 @@ class SoledadQuerier:
         uid = self._next_uid_for_mailbox(mailbox_name)
         new_docs = [self.soledad.create_doc(doc) for doc in mail._get_for_save(next_uid=uid, mailbox=mailbox_name)]
         self._update_index(new_docs)
+        return self.mail(mail.ident)
 
     def mail(self, ident):
         fdoc = self.soledad.get_from_index('by-type-and-contenthash', 'flags', ident)[0]

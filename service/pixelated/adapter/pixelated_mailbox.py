@@ -45,7 +45,7 @@ class PixelatedMailbox:
                 return message
 
     def add(self, mail):
-        self.querier.create_mail(mail, self.mailbox_name)
+        return self.querier.create_mail(mail, self.mailbox_name)
 
     def add_existing(self, mail_ident):
         mail = self.querier.mail(mail_ident)
