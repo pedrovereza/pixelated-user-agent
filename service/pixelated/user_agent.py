@@ -27,7 +27,6 @@ from flask import Response
 from pixelated.adapter.pixelated_mail_sender import PixelatedMailSender
 from pixelated.adapter.pixelated_mailboxes import PixelatedMailBoxes
 import pixelated.reactor_manager as reactor_manager
-import pixelated.search_query as search_query
 import pixelated.bitmask_libraries.session as LeapSession
 from pixelated.bitmask_libraries.config import LeapConfig
 from pixelated.bitmask_libraries.provider import LeapProvider
