@@ -30,6 +30,8 @@ class MarkAsReadTest(unittest.TestCase, SoledadTestBase):
         self.pixelated_mailboxes.inbox().add(input_mail)
 
         mails = self.get_mails_by_tag('inbox')
+        print input_mail
+        print mails
         self.assertFalse('read' in mails[0].status)
 
         self.mark_as_read(input_mail.ident)

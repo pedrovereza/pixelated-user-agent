@@ -36,6 +36,7 @@ from pixelated.adapter.mail_service import MailService
 from pixelated.adapter.pixelated_mail import PixelatedMail, InputMail
 from pixelated.adapter.soledad_querier import SoledadQuerier
 from pixelated.adapter.search import SearchEngine
+from pixelated.adapter.draft_service import DraftService
 
 static_folder = os.path.abspath(os.path.join(os.path.abspath(__file__), "..", "..", "web-ui", "app"))
 
@@ -71,14 +72,14 @@ def send_mail():
     if draft_id:
         mail_service.send(draft_id, _mail)
     else:
-        _mail = mail_service.create_draft(_mail)
+        _mail = draft_service.create_draft(_mail)
     return respond_json(_mail.as_dict())
 
 
 @app.route('/mails', methods=['PUT'])
 def update_draft():
     _mail = InputMail.from_dict(request.json)
-    new_revision = mail_service.update_draft(request.json['ident'], _mail)
+    new_revision = draft_service.update_draft(request.json['ident'], _mail)
     ident = new_revision.ident
     return respond_json({'ident': ident})
 
@@ -123,9 +124,9 @@ def tags():
     query = request.args.get('q')
 
     if query:
-        tags = [tag for tag in mail_service.all_tags() if bool(re.match(query, tag.name, re.IGNORECASE))]
+        tags = [tag for tag in tag_service.all_tags() if bool(re.match(query, tag.name, re.IGNORECASE))]
     else:
-        tags = mail_service.all_tags()
+        tags = tag_service.all_tags()
 
     return respond_json([tag.as_dict() for tag in tags])
 
@@ -191,6 +192,10 @@ def start_user_agent(debug_enabled):
     global search_engine
     search_engine = SearchEngine()
     search_engine.index_mails(mail_service.all_mails())
+    global draft_service
+    draft_service = DraftService(pixelated_mailboxes)
+    global tag_service
+    tag_service = TagService.get_instance()
 
     app.run(host=app.config['HOST'], debug=debug_enabled,
             port=app.config['PORT'], use_reloader=False)

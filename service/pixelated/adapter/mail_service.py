@@ -20,8 +20,6 @@ from pixelated.adapter.soledad_querier import SoledadQuerier
 class MailService:
     __slots__ = ['leap_session', 'account', 'mailbox_name']
 
-    ALL_MAILS_QUERY = {'tags': ['all']}
-
     def __init__(self, mailboxes, mail_sender, tag_service=TagService.get_instance()):
         self.tag_service = tag_service
         self.mailboxes = mailboxes
@@ -51,18 +49,6 @@ class MailService:
         self.mail_sender.sendmail(mail)
         self.mailboxes.drafts().remove(last_draft_ident)
         self.mailboxes.sent().add(mail)
-
-    def create_draft(self, mail):
-        return self.mailboxes.add_draft(mail)
-
-    def update_draft(self, ident, new_version):
-        return self.mailboxes.update_draft(ident, new_version)
-
-    def send_draft(self, mail):
-        pass
-
-    def all_tags(self):
-        return self.tag_service.all_tags()
 
     def thread(self, thread_id):
         raise NotImplementedError()

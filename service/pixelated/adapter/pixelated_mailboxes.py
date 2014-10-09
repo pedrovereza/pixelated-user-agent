@@ -51,15 +51,6 @@ class PixelatedMailBoxes():
 
         return mails
 
-    def add_draft(self, mail):
-        self.drafts().add(mail)
-        return mail
-
-    def update_draft(self, ident, new_version):
-        new_mail = self.add_draft(new_version)
-        self.drafts().remove(ident)
-        return new_mail
-
     def move_to_trash(self, mail_id):
         new_mail_id = self.trash().add_existing(mail_id)
         return new_mail_id
