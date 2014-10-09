@@ -36,6 +36,7 @@ from pixelated.adapter.mail_service import MailService
 from pixelated.adapter.pixelated_mail import PixelatedMail, InputMail
 from pixelated.adapter.soledad_querier import SoledadQuerier
 from pixelated.adapter.search import SearchEngine
+from pixelated.adapter.tag_service import TagService
 from pixelated.adapter.draft_service import DraftService
 
 static_folder = os.path.abspath(os.path.join(os.path.abspath(__file__), "..", "..", "web-ui", "app"))
@@ -47,7 +48,6 @@ if not os.path.exists(static_folder):
     static_folder = os.path.join('/', 'usr', 'share', 'pixelated-user-agent')
 app = Flask(__name__, static_url_path='', static_folder=static_folder)
 DISABLED_FEATURES = ['draftReply', 'signatureStatus', 'encryptionStatus', 'contacts']
-
 
 def respond_json(entity, status_code=200):
     json_response = json.dumps(entity)

@@ -35,9 +35,15 @@ class UserAgentTest(unittest.TestCase):
     def setUp(self):
         self.app = pixelated.user_agent.app.test_client()
         self.mail_service = mock()
+        self.tag_service = mock()
+        self.draft_service = mock()
+        self.search_engine = mock()
 
         pixelated.user_agent.DISABLED_FEATURES = []
         pixelated.user_agent.mail_service = self.mail_service
+        pixelated.user_agent.tag_service = self.tag_service
+        pixelated.user_agent.draft_service = self.draft_service
+        pixelated.user_agent.search_engine = self.search_engine
         self.input_mail = None
         pixelated.adapter.pixelated_mail.input_mail_from_dict = lambda x: self.input_mail
 
@@ -49,7 +55,7 @@ class UserAgentTest(unittest.TestCase):
 
         self.app.post('/mails', data='{}', content_type="application/json")
 
-        verify(self.mail_service).create_draft(self.input_mail)
+        verify(self.draft_service).create_draft(self.input_mail)
 
     def test_create_or_send_draft_should_send_draft_if_mail_has_ident(self):
         self.input_mail = self.draft()
@@ -61,11 +67,11 @@ class UserAgentTest(unittest.TestCase):
     def test_update_draft(self):
         self.input_mail = self.draft()
 
-        when(self.mail_service).update_draft(1, self.input_mail).thenReturn(self.input_mail)
+        when(self.draft_service).update_draft(1, self.input_mail).thenReturn(self.input_mail)
 
         self.app.put('/mails', data='{"ident":1}', content_type="application/json")
 
-        verify(self.mail_service).update_draft(1, self.input_mail)
+        verify(self.draft_service).update_draft(1, self.input_mail)
 
     def draft(self):
         return test_helper.input_mail()
@@ -101,7 +107,7 @@ class UserAgentTest(unittest.TestCase):
             pixelated.user_agent.app.config = orig_config
 
     def test_that_tags_returns_all_tags(self):
-        when(self.mail_service).all_tags().thenReturn(TagService.SPECIAL_TAGS)
+        when(self.tag_service).all_tags().thenReturn(TagService.SPECIAL_TAGS)
 
         response = self.app.get('/tags')
 
@@ -110,7 +116,7 @@ class UserAgentTest(unittest.TestCase):
         self.assertEqual(expected, response.data)
 
     def test_that_tags_are_filtered_by_query(self):
-        when(self.mail_service).all_tags().thenReturn(TagService.SPECIAL_TAGS)
+        when(self.tag_service).all_tags().thenReturn(TagService.SPECIAL_TAGS)
 
         response = self.app.get('/tags?q=dr')
 
