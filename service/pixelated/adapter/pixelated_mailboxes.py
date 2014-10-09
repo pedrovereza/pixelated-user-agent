@@ -14,12 +14,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Pixelated. If not, see <http://www.gnu.org/licenses/>.
 from pixelated.adapter.pixelated_mailbox import PixelatedMailbox
+from pixelated.adapter.soledad_querier import SoledadQuerier
 
 
 class PixelatedMailBoxes():
 
     def __init__(self, account):
         self.account = account
+        self.querier = SoledadQuerier.get_instance()
 
     def _create_or_get(self, mailbox_name):
         mailbox_name = mailbox_name.upper()
@@ -52,8 +54,11 @@ class PixelatedMailBoxes():
         return mails
 
     def move_to_trash(self, mail_id):
-        new_mail_id = self.trash().add_existing(mail_id)
-        return new_mail_id
+        mail = self.querier.mail(mail_id)
+        mail.remove_all_tags()
+        mail.set_mailbox(self.trash().mailbox_name)
+        mail.save()
+        return mail
 
     def mail(self, mail_id):
         for mailbox in self.mailboxes:

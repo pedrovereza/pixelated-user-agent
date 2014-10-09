@@ -155,6 +155,10 @@ class SoledadTestBase:
     def mark_as_read(self, mail_ident):
         self.app.post('/mail/' + mail_ident + '/read', content_type="application/json")
 
+    def add_mail_to_inbox(self, input_mail):
+        mail = self.pixelated_mailboxes.inbox().add(input_mail)
+        self.search_engine.index_mail(mail)
+
 
 class ResponseMail:
 

@@ -109,7 +109,8 @@ def mails():
 
 @app.route('/mail/<mail_id>', methods=['DELETE'])
 def delete_mail(mail_id):
-    mail_service.delete_mail(mail_id)
+    trashed_mail = mail_service.delete_mail(mail_id)
+    search_engine.index_mail(trashed_mail)
     return respond_json(None)
 
 
@@ -144,6 +145,7 @@ def mail_tags(mail_id):
     new_tags = map(lambda tag: tag.lower(), request.get_json()['newtags'])
     try:
         tags = mail_service.update_tags(mail_id, new_tags)
+        search_engine.index_mail(mail_service.mail(mail_id))
     except ValueError as ve:
         return respond_json(ve.message, 403)
     return respond_json(list(tags))

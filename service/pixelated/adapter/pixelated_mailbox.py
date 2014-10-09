@@ -47,12 +47,6 @@ class PixelatedMailbox:
     def add(self, mail):
         return self.querier.create_mail(mail, self.mailbox_name)
 
-    def add_existing(self, mail_ident):
-        mail = self.querier.mail(mail_ident)
-        mail.remove_all_tags()
-        mail.set_mailbox(self.mailbox_name)
-        mail.save()
-
     def remove(self, ident):
         mail = self.querier.mail(ident)
         mail.remove_all_tags()
