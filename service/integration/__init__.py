@@ -21,6 +21,7 @@ import os
 from mock import Mock
 import shutil
 from pixelated.adapter.mail_service import MailService
+from pixelated.adapter.search import SearchEngine
 from pixelated.adapter.tag_index import TagIndex
 from pixelated.adapter.tag_service import TagService
 import pixelated.user_agent
@@ -123,8 +124,11 @@ class SoledadTestBase:
         self.tag_service = TagService(self.tag_index)
         self.pixelated_mailboxes = PixelatedMailBoxes(self.account)
         self.mail_service = MailService(self.pixelated_mailboxes, self.mail_sender, self.tag_service)
+        self.search_engine = SearchEngine()
+        self.search_engine.index_mails(self.mail_service.all_mails())
 
         pixelated.user_agent.mail_service = self.mail_service
+        pixelated.user_agent.search_engine = self.search_engine
 
     def get_mails_by_tag(self, tag):
         response = json.loads(self.app.get("/mails?q=tag:" + tag).data)
